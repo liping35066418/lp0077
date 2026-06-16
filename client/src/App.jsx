@@ -104,7 +104,7 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/levels/${levelId}`).then(r => r.json());
       if (res.success) {
-        setSelectedLevel(res.data.level);
+        setSelectedLevel({ ...res.data.level, isCompleted: res.data.isCompleted });
         setAvailableFlowers(res.data.availableFlowers);
         setAvailableLeaves(res.data.availableLeaves);
         setRemainingAttempts(res.data.remainingAttempts);
@@ -126,6 +126,7 @@ export default function App() {
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    if (selectedLevel?.isCompleted) return;
     e.dataTransfer.dropEffect = 'copy';
     setIsDragOver(true);
   };
@@ -138,6 +139,7 @@ export default function App() {
     e.preventDefault();
     setIsDragOver(false);
 
+    if (selectedLevel?.isCompleted) return;
     if (!canvasRef.current) return;
 
     let item = draggedItem;
@@ -161,6 +163,7 @@ export default function App() {
   };
 
   const addItemToBouquet = (item, x, y) => {
+    if (selectedLevel?.isCompleted) return;
     const rect = canvasRef.current?.getBoundingClientRect();
     const maxX = (rect?.width || 600) - 80;
     const maxY = (rect?.height || 480) - 100;
@@ -179,7 +182,7 @@ export default function App() {
   };
 
   const handleMaterialClick = (item) => {
-    if (removeMode) return;
+    if (removeMode || selectedLevel?.isCompleted) return;
     addItemToBouquet(item);
   };
 
@@ -391,13 +394,21 @@ export default function App() {
               </div>
 
               <div
-                className={`canvas-area ${isDragOver ? 'drag-over' : ''}`}
+                className={`canvas-area ${isDragOver ? 'drag-over' : ''} ${selectedLevel?.isCompleted ? 'completed' : ''}`}
                 style={cssVars}
                 ref={canvasRef}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleBouquetItemDrop}
               >
+                {selectedLevel?.isCompleted && (
+                  <div className="completed-overlay">
+                    <div className="completed-badge">
+                      <div className="completed-icon">🎉</div>
+                      <div className="completed-text">本关已通关</div>
+                    </div>
+                  </div>
+                )}
                 {bouquet.length === 0 ? (
                   <div className="canvas-placeholder">
                     <div className="canvas-placeholder-icon">💐</div>
@@ -435,9 +446,9 @@ export default function App() {
                 <button
                   className="btn btn-primary"
                   onClick={evaluateBouquet}
-                  disabled={bouquet.length === 0 || isEvaluating || remainingAttempts <= 0}
+                  disabled={bouquet.length === 0 || isEvaluating || remainingAttempts <= 0 || selectedLevel?.isCompleted}
                 >
-                  {isEvaluating ? '⏳ 评分中...' : '✨ 提交花束并评分'}
+                  {isEvaluating ? '⏳ 评分中...' : selectedLevel?.isCompleted ? '✓ 本关已通关' : '✨ 提交花束并评分'}
                 </button>
                 <button
                   className={`btn ${removeMode ? 'btn-danger' : 'btn-warning'}`}
@@ -493,8 +504,8 @@ export default function App() {
             {currentMaterials.map(item => (
               <div
                 key={item.id}
-                className="material-card"
-                draggable
+                className={`material-card${selectedLevel?.isCompleted ? ' disabled' : ''}`}
+                draggable={!selectedLevel?.isCompleted}
                 onDragStart={(e) => handleDragStart(e, item)}
                 onClick={() => handleMaterialClick(item)}
                 title={`${item.name} - 点击或拖拽添加`}

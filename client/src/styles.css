@@ -236,6 +236,60 @@ body {
   box-shadow: inset 0 0 0 3px #ff6b9d, inset 0 0 60px rgba(255, 107, 157, 0.1);
 }
 
+.canvas-area.completed {
+  filter: grayscale(30%);
+}
+
+.completed-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(82, 196, 26, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: none;
+  border-radius: 20px;
+}
+
+.completed-badge {
+  background: linear-gradient(135deg, #52c41a 0%, #95de64 100%);
+  color: #fff;
+  padding: 20px 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(82, 196, 26, 0.4);
+  animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.completed-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.completed-text {
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 .canvas-placeholder {
   position: absolute;
   top: 50%;
@@ -457,6 +511,12 @@ body {
 
 .material-card:active {
   cursor: grabbing;
+}
+
+.material-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .material-color {
